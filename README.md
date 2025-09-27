@@ -65,10 +65,6 @@ Voting deployed at: 0xABCDEF...
 
 Guarda la **dirección del contrato** para los siguientes pasos.
 
-> ⚠️ En todos los comandos **no** hace falta `--network localhost`; los scripts ya lo gestionan internamente.
-
----
-
 ## Variables de entorno
 
 Estas variables se leen vía `process.env.*` en los scripts.
