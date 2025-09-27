@@ -1,37 +1,31 @@
 # Voting (by code)
 
-MVP de sistema de votación *on-chain* donde **cada elección** está identificada por un **código** (p. ej. `ES-GENERALES-2026`) y **cada voto es texto libre** (partido/opción/decisión). En cadena sólo se almacena el **hash** del texto para preservar la privacidad.
+MVP de votación on-chain donde cada elección está identificada por un **código legible** (p. ej. `ES-GENERALES-2026`) y cada voto es **texto libre**. En cadena **solo se almacena el hash** del texto, preservando la privacidad.
 
 ---
 
-## 🧱 Requisitos
+## Requisitos
 
-* **Node.js ≥ 22.10.0** (Hardhat 3). Ver: [Hardhat – Node.js support](https://hardhat.org/docs/reference/nodejs-support) y [Getting started](https://hardhat.org/docs/getting-started).
-* **npm** o **pnpm/yarn**.
-* Dependencias (ya en `package.json`): `hardhat`, `@nomicfoundation/hardhat-ethers`, `ethers@^6`, `@openzeppelin/contracts`.
-* Opcional para variables: `dotenv` o `cross-env`.
-
-> Documentación oficial útil
->
-> * Hardhat: [Getting started](https://hardhat.org/docs/getting-started), [Ignition + Ethers](https://hardhat.org/ignition/docs/guides/ethers)
-> * Ethers v6 (hashing): [Cryptographic Functions](https://docs.ethers.org/v6/api/crypto/)
-> * OpenZeppelin AccessControl: [docs](https://docs.openzeppelin.com/contracts/4.x/access-control)
-> * Variables de entorno: [PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables), [CMD `set`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/set_1), [Node `process.env`](https://nodejs.org/api/environment_variables.html)
+- Node.js 22.x LTS o superior.
+- npm / pnpm / yarn.
+- Dependencias (en `package.json`): `hardhat`, `@nomicfoundation/hardhat-ethers`, `ethers@^6`, `@openzeppelin/contracts`.
+- (Opcional) `dotenv` o `cross-env` para cargar variables de entorno.
 
 ---
 
-## 📁 Estructura relevante
+## Estructura (resumen)
 
 ```
 contracts/
   Voting.sol
 scripts/
-  deploy.ts
   create.ts
   enroll.ts
   vote.text.ts
   tally.hash.ts
   myvote.ts
+  verify.myvote.ts    # Nuevo: verificación de voto por texto
+  deploy.ts
   lib/helpers.ts
 test/
   voting.test.ts
@@ -39,149 +33,130 @@ test/
 
 ---
 
-## 1) Instalar & compilar
+## Instalación y compilación
 
 ```bash
 npm install
 npm run build   # alias de: hardhat compile
 ```
 
-**Si ves un aviso de Node no soportado**, instala Node ≥ 22.10.0 y vuelve a intentar.
-
 ---
 
-## 2) Levantar nodo local y desplegar
+## Nodo local y despliegue
 
-En **terminal 1**:
+En una terminal:
 
 ```bash
 npm run node    # alias de: hardhat node
 ```
 
-En **terminal 2** (misma carpeta del proyecto):
+En otra terminal (misma carpeta):
 
 ```bash
 npm run deploy  # ejecuta scripts/deploy.ts
 ```
 
-La salida mostrará algo como:
+La salida mostrará algo así:
 
 ```
 Deployer: 0x...
 Voting deployed at: 0xABCDEF...
 ```
 
-Copia esa **dirección de contrato** para los pasos siguientes.
+Guarda la **dirección del contrato** para los siguientes pasos.
+
+> ⚠️ En todos los comandos **no** hace falta `--network localhost`; los scripts ya lo gestionan internamente.
 
 ---
 
-## 3) Variables de entorno (elige tu shell)
+## Variables de entorno
 
-Estas variables son leídas por los scripts (`process.env.*`).
+Estas variables se leen vía `process.env.*` en los scripts.
 
-### Windows — **CMD**
+| Variable        | ¿Qué es?                                                                | Ejemplo                         | Uso principal                                                                              |
+|-----------------|--------------------------------------------------------------------------|---------------------------------|--------------------------------------------------------------------------------------------|
+| `CONTRACT`      | Dirección del contrato `Voting` desplegado                               | `0xABCDEF...`                   | Interacción con el contrato                                                                |
+| `CODE_HUMAN`    | Identificador legible de la elección                                     | `ES-GENERALES-2026`             | Se transforma a `bytes32` vía `keccak256(utf8(code))`                                      |
+| `META`          | Descripción/metadatos de la elección                                     | `Elecciones Generales 2026`     | Información adicional al crear la elección                                                 |
+| `START`         | Inicio de votación en **epoch segundos**                                 | `1730000000`                    | Límite inferior temporal                                                                   |
+| `END`           | Fin de votación en **epoch segundos**                                    | `1730003600`                    | Límite superior temporal                                                                   |
+| `ALLOW_CHANGE`  | Permitir cambio de voto (`true`/`false`)                                 | `true`                          | Parámetro opcional al crear la elección                                                    |
+| `VOTER_SECRET`  | **Secreto del votante off-chain**. Cadena **estable** (mismo formato siempre) | `dni|fecha|secreto`             | Se hashea → `voterHash` para `enroll` y para consulta `myVoteHash`                         |
+| `VOTE_TEXT`     | Texto exacto del voto                                                    | `PSOE`                          | Para votar (`vote.text.ts`) y verificar (`verify.myvote.ts`)                               |
+| `OPTION_TEXT`   | Texto de la opción a consultar                                           | `PSOE`                          | Para recuento por opción (`tally.hash.ts`)                                                 |
 
+### Windows (CMD) — escapar `|`
+En **CMD** `|` es un *pipe*. Para usarlo dentro de una variable debes **escaparlo con `^`** o usar comillas.
+
+**CMD**
 ```bat
-set CONTRACT=0xABCDEF...
-set CODE_HUMAN=ES-GENERALES-2026
-set META=Elecciones Generales 2026
-set START=1730000000
-set END=1730003600
+set VOTER_SECRET=46455745V^|01/07/32^|mvp
 ```
 
-### Windows — **PowerShell**
-
+**PowerShell**
 ```powershell
-$env:CONTRACT = "0xABCDEF..."
-$env:CODE_HUMAN = "ES-GENERALES-2026"
-$env:META       = "Elecciones Generales 2026"
-$env:START      = "1730000000"
-$env:END        = "1730003600"
+$env:VOTER_SECRET = "46455745V|01/07/32|mvp"
 ```
 
-### macOS/Linux — **bash/zsh**
-
+**bash/zsh**
 ```bash
-export CONTRACT=0xABCDEF...
-export CODE_HUMAN=ES-GENERALES-2026
-export META="Elecciones Generales 2026"
-export START=1730000000
-export END=1730003600
+export VOTER_SECRET="46455745V|01/07/32|mvp"
 ```
 
-> Alternativas:
->
-> * `.env` con `dotenv` (añade `import "dotenv/config"` al inicio de cada script)
-> * `cross-env` en scripts de `package.json`.
+> El contrato **no interpreta** la fecha: es solo texto. Usa **siempre el mismo formato** cuando te inscribes y cuando verificas (p. ej., `DD/MM/YY`).
 
 ---
 
-## 4) Crear una elección (registrar la cuestión)
+## Crear una elección
 
-Necesitas tener `CONTRACT`, `CODE_HUMAN`, `META`, `START`, `END` (y opcional `ALLOW_CHANGE=true|false`, por defecto `true`).
+Necesitas `CONTRACT`, `CODE_HUMAN`, `META`, `START`, `END` (opcional `ALLOW_CHANGE=true|false`, por defecto `true`).
 
 ```bash
 npm run create
 ```
 
-Este script llama a `Voting.createElection(code, meta, start, end, allowChange)`.
-
-**Notas**
-
-* `CODE_HUMAN` es cualquier identificador legible (p.ej. `ES-GENERALES-2026`). En el script se convierte a `bytes32` con `keccak256(toUtf8Bytes(humanId))` (Ethers v6).
-* `START` / `END` son **epoch (segundos)**.
-
 ---
 
-## 5) Registrar votante en esa elección (enroll)
+## Registrar votante (enroll)
 
-Variables requeridas: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET` (tu secreto fuera de cadena). El script lo hashea como `voterHash`.
+Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 
-```bash
-# Definir el secreto
-# CMD
-set VOTER_SECRET=dni|fecha|secreto
-# PowerShell
-# $env:VOTER_SECRET = "dni|fecha|secreto"
-# bash/zsh
-# export VOTER_SECRET="dni|fecha|secreto"
-
+```bat
+:: CMD (ojo con ^| si tu secreto lleva tuberías)
+set VOTER_SECRET=dni^|fecha^|secreto
 npm run enroll
 ```
 
-Esto invoca `Voting.enroll(code, voterHash)`.
-
 ---
 
-## 6) Votar con **texto libre**
+## Votar con texto libre
 
-Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`, `VOTE_TEXT` (p.ej. `"PSOE"`, `"PP"`, `"Sí reforma"`).
+Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`, `VOTE_TEXT`.
 
-```bash
-# CMD
+```bat
 set VOTE_TEXT=PSOE
 npm run vote:text
 ```
 
-El contrato calcula `keccak256(bytes(voteText))` y actualiza el recuento por **hash**. Si la elección permite cambio (`allowChange=true`), el **último voto** sustituye al anterior.
+- El script normaliza el texto conforme al helper del proyecto (p. ej., trimming / case-fold) y calcula `keccak256(bytes(voteText))`.
+- Si `ALLOW_CHANGE=true`, el último voto sustituye al anterior.
 
 ---
 
-## 7) Recuento por opción (texto)
+## Recuento por opción (texto)
 
 Variables: `CONTRACT`, `CODE_HUMAN`, `OPTION_TEXT`.
 
-```bash
-# CMD
+```bat
 set OPTION_TEXT=PSOE
 npm run tally:hash
 ```
 
-El script hashea `OPTION_TEXT` con la misma normalización (minúsculas + trim) y consulta `Voting.tallyByHash(code, voteHash)`.
+Consulta `tallyByHash(code, keccak256(normalized(OPTION_TEXT)))` con la misma normalización que al votar.
 
 ---
 
-## 8) Verificar tu propio voto (hash)
+## Ver tu hash de voto
 
 Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 
@@ -189,37 +164,80 @@ Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 npm run myvote
 ```
 
-Devuelve tu **hash de voto** almacenado (`Voting.myVoteHash(code, voterHash)`).
+Devuelve tu `myVoteHash` almacenado on-chain.
 
 ---
 
-## 9) Ejecutar tests
+## Verificar tu voto (texto ↔ hash) ✅
+
+> **Nuevo**: `scripts/verify.myvote.ts`  
+> Asegúrate de añadir el script en `package.json`:
+>
+> ```json
+> {
+>   "scripts": {
+>     "verify:myvote": "hardhat run scripts/verify.myvote.ts"
+>   }
+> }
+> ```
+
+Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`, `VOTE_TEXT`.
+
+```bat
+set VOTE_TEXT=PSOE
+npm run verify:myvote
+```
+
+El script:
+1) Lee `myVoteHash` desde `Voting.myVoteHash(code, voterHash)`.
+2) Normaliza y hashea `VOTE_TEXT` exactamente igual que al votar (usa el mismo helper).
+3) Compara y muestra **MATCH / NO MATCH**.
+
+Ejemplos de salida:
+
+```
+My vote hash on-chain: 0xabc...
+Hash(text):           0xabc...
+✅ MATCH: el texto coincide con tu hash almacenado
+```
+
+```
+My vote hash on-chain: 0xabc...
+Hash(text):           0xdef...
+❌ NO MATCH: el texto NO coincide con tu hash
+```
+
+---
+
+## Tests
 
 ```bash
 npm test
 ```
 
-El test `test/voting.test.ts` cubre: crear elección, enroll, votar texto, cambiar voto, lecturas.
+Cubre: crear elección, enroll, votar texto, cambio de voto y lecturas.
 
 ---
 
-## 🔐 Seguridad y buenas prácticas
+## Buenas prácticas
 
-* **Roles**: la creación de elecciones está protegida por `AccessControl` (sólo `ADMIN_ROLE`). Ver [OpenZeppelin – AccessControl](https://docs.openzeppelin.com/contracts/4.x/access-control).
-* **Privacidad**: no se guarda el texto del voto, sólo su **hash** (`keccak256`). Ethers v6: [Cryptographic Functions](https://docs.ethers.org/v6/api/crypto/).
-* **Hash de múltiples dinámicos**: si en el futuro combinas varios strings/bytes para el hash (p. ej. *commit–reveal*), usa `abi.encode(...)` antes de `keccak256(...)` para evitar colisiones de `abi.encodePacked(...)` con tipos dinámicos (ver notas de la especificación ABI de Solidity).
-
----
-
-## 🛠️ Solución de problemas
-
-* **"export no se reconoce" en Windows** → usa `set` (CMD) o `$env:` (PowerShell). Ver: [CMD set](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/set_1), [PowerShell env](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables).
-* **`Cannot find module './lib/helpers.js'`** → estás importando con `.js` pero el archivo es TS. En los scripts usa `import ... from "./lib/helpers"` (sin extensión) o `"./lib/helpers.ts"`.
-* **`getSigners is not a function/undefined`** → en Hardhat 3 usa el patrón `const connection = await hre.network.connect(); const { ethers } = connection; const [signer] = await ethers.getSigners();`.
-* **Node no soportado / errores extraños** → asegúrate de usar Node ≥ 22.10.0. Ver: [Node.js support](https://hardhat.org/docs/reference/nodejs-support).
+- **Roles**: creación de elecciones restringida con `AccessControl` (solo `ADMIN_ROLE`).
+- **Privacidad**: se guarda **solo el hash** del voto (`keccak256`), nunca el texto.
+- Si combinas múltiples valores dinámicos antes de hashear, usa `abi.encode(...)` → `keccak256(...)` para evitar colisiones sutiles.
 
 ---
 
-## 📜 Licencia
+## Referencias (documentación oficial)
 
-MIT (o la que definas para tu proyecto).
+- **Hardhat (Introducción / Ethers):** <https://hardhat.org/docs>
+- **Ethers v6 (`keccak256`, UTF-8):** <https://docs.ethers.org/v6/>
+- **OpenZeppelin AccessControl:** <https://docs.openzeppelin.com/contracts>
+- **Variables de entorno en Node (`process.env`):** <https://nodejs.org/api/environment_variables.html>
+- **Windows CMD — caracteres especiales / `^` para `|`:** <https://learn.microsoft.com/windows-server/administration/windows-commands/cmd>
+- **PowerShell — comillas y caracteres especiales:** <https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_Special_Characters>
+
+---
+
+## Licencia
+
+MIT
