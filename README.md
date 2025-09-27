@@ -77,7 +77,7 @@ Estas variables se leen vía `process.env.*` en los scripts.
 | `START`         | Inicio de votación en **epoch segundos**                                 | `1730000000`                    | Límite inferior temporal                                                                   |
 | `END`           | Fin de votación en **epoch segundos**                                    | `1730003600`                    | Límite superior temporal                                                                   |
 | `ALLOW_CHANGE`  | Permitir cambio de voto (`true`/`false`)                                 | `true`                          | Parámetro opcional al crear la elección                                                    |
-| `VOTER_SECRET`  | **Secreto del votante off-chain**. Cadena **estable** (mismo formato siempre) | `dni|fecha|secreto`             | Se hashea → `voterHash` para `enroll` y para consulta `myVoteHash`                         |
+| `VOTER_SECRET`  | **Secreto del votante off-chain**. Cadena **estable** (mismo formato siempre) | `46455745V`             | Se hashea → `voterHash` para `enroll` y para consulta `myVoteHash`                         |
 | `VOTE_TEXT`     | Texto exacto del voto                                                    | `PSOE`                          | Para votar (`vote.text.ts`) y verificar (`verify.myvote.ts`)                               |
 | `OPTION_TEXT`   | Texto de la opción a consultar                                           | `PSOE`                          | Para recuento por opción (`tally.hash.ts`)                                                 |
 
@@ -86,17 +86,17 @@ En **CMD** `|` es un *pipe*. Para usarlo dentro de una variable debes **escaparl
 
 **CMD**
 ```bat
-set VOTER_SECRET=46455745V^|01/07/32^|mvp
+set VOTER_SECRET=46455745V
 ```
 
 **PowerShell**
 ```powershell
-$env:VOTER_SECRET = "46455745V|01/07/32|mvp"
+$env:VOTER_SECRET = "46455745V
 ```
 
 **bash/zsh**
 ```bash
-export VOTER_SECRET="46455745V|01/07/32|mvp"
+export VOTER_SECRET="46455745V
 ```
 
 > El contrato **no interpreta** la fecha: es solo texto. Usa **siempre el mismo formato** cuando te inscribes y cuando verificas (p. ej., `DD/MM/YY`).
