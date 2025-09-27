@@ -122,7 +122,7 @@ npm run create
 Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 
 ```bat
-:: CMD (ojo con ^| si tu secreto lleva tuberías)
+:: CMD (ojo con ^|, es necesario para caracteres especiales en CMD)
 set VOTER_SECRET=dni^|fecha^|secreto
 npm run enroll
 ```
