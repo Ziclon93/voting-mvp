@@ -198,8 +198,6 @@ Hash(text):           0xdef...
 - **Ethers v6 (`keccak256`, UTF-8):** <https://docs.ethers.org/v6/>
 - **OpenZeppelin AccessControl:** <https://docs.openzeppelin.com/contracts>
 - **Variables de entorno en Node (`process.env`):** <https://nodejs.org/api/environment_variables.html>
-- **Windows CMD — caracteres especiales / `^` para `|`:** <https://learn.microsoft.com/windows-server/administration/windows-commands/cmd>
-- **PowerShell — comillas y caracteres especiales:** <https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_Special_Characters>
 
 ---
 

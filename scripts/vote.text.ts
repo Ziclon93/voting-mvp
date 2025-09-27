@@ -1,5 +1,5 @@
 import hre from "hardhat";
-import { codeFromHuman, voterHashFromSecret } from "./lib/helpers.ts";
+import { codeFromHuman, voterHashFromSecret, canonicalize } from "./lib/helpers.ts";
 
 async function main() {
   const connection = await hre.network.connect();
@@ -8,10 +8,11 @@ async function main() {
   const ADDR   = process.env.CONTRACT!;
   const human  = process.env.CODE_HUMAN!;
   const secret = process.env.VOTER_SECRET!;
-  const vote   = process.env.VOTE_TEXT!;   // "PSOE", "PP", "Sí reforma", etc.
+  const voteRaw = process.env.VOTE_TEXT!;
 
   const code = codeFromHuman(human);
   const voterHash = voterHashFromSecret(secret);
+  const vote = canonicalize(voteRaw);
 
   const c = await ethers.getContractAt("Voting", ADDR);
   const tx = await c.castVote(code, voterHash, vote);
