@@ -86,15 +86,13 @@ set VOTER_SECRET=46455745V
 
 **PowerShell**
 ```powershell
-$env:VOTER_SECRET = 46455745V
+$env:VOTER_SECRET = "46455745V"
 ```
 
 **bash/zsh**
 ```bash
 export VOTER_SECRET=46455745V
 ```
-
-> El contrato **no interpreta** la fecha: es solo texto. Usa **siempre el mismo formato** cuando te inscribes y cuando verificas (p. ej., `DD/MM/YY`).
 
 ---
 
@@ -113,8 +111,7 @@ npm run create
 Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 
 ```bat
-:: CMD (ojo con ^|, es necesario para caracteres especiales en CMD)
-set VOTER_SECRET=dni^|fecha^|secreto
+set VOTER_SECRET=dni
 npm run enroll
 ```
 
