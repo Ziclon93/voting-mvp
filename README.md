@@ -79,9 +79,6 @@ Estas variables se leen vía `process.env.*` en los scripts.
 | `VOTE_TEXT`     | Texto exacto del voto                                                    | `PSOE`                          | Para votar (`vote.text.ts`) y verificar (`verify.myvote.ts`)                               |
 | `OPTION_TEXT`   | Texto de la opción a consultar                                           | `PSOE`                          | Para recuento por opción (`tally.hash.ts`)                                                 |
 
-### Windows (CMD) — escapar `|`
-En **CMD** `|` es un *pipe*. Para usarlo dentro de una variable debes **escaparlo con `^`** o usar comillas.
-
 **CMD**
 ```bat
 set VOTER_SECRET=46455745V
@@ -89,12 +86,12 @@ set VOTER_SECRET=46455745V
 
 **PowerShell**
 ```powershell
-$env:VOTER_SECRET = "46455745V
+$env:VOTER_SECRET = 46455745V
 ```
 
 **bash/zsh**
 ```bash
-export VOTER_SECRET="46455745V
+export VOTER_SECRET=46455745V
 ```
 
 > El contrato **no interpreta** la fecha: es solo texto. Usa **siempre el mismo formato** cuando te inscribes y cuando verificas (p. ej., `DD/MM/YY`).
