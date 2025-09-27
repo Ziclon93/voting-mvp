@@ -27,8 +27,6 @@ scripts/
   verify.myvote.ts    # Nuevo: verificación de voto por texto
   deploy.ts
   lib/helpers.ts
-test/
-  voting.test.ts
 ```
 
 ---
@@ -191,18 +189,6 @@ My vote hash on-chain: 0xabc...
 Hash(text):           0xdef...
 ❌ NO MATCH: el texto NO coincide con tu hash
 ```
-
----
-
-## Tests
-
-```bash
-npm test
-```
-
-Cubre: crear elección, enroll, votar texto, cambio de voto y lecturas.
-
----
 
 ## Buenas prácticas
 
