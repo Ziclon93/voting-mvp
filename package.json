@@ -12,7 +12,8 @@
     "enroll": "hardhat run scripts/enroll.ts --network localhost",
     "vote:text": "hardhat run scripts/vote.text.ts --network localhost",
     "tally:hash": "hardhat run scripts/tally.hash.ts --network localhost",
-    "myvote": "hardhat run scripts/myvote.ts --network localhost"
+    "myvote": "hardhat run scripts/myvote.ts --network localhost",
+    "verify:myvote": "hardhat run scripts/verify.myvote.ts --network localhost"
   },
   "keywords": [],
   "author": "",

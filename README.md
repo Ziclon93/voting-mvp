@@ -61,7 +61,7 @@ npm run node    # alias de: hardhat node
 En **terminal 2** (misma carpeta del proyecto):
 
 ```bash
-npm run deploy  # ejecuta scripts/deploy.ts --network localhost
+npm run deploy  # ejecuta scripts/deploy.ts
 ```
 
 La salida mostrará algo como:
@@ -121,7 +121,7 @@ export END=1730003600
 Necesitas tener `CONTRACT`, `CODE_HUMAN`, `META`, `START`, `END` (y opcional `ALLOW_CHANGE=true|false`, por defecto `true`).
 
 ```bash
-npm run create --network localhost
+npm run create
 ```
 
 Este script llama a `Voting.createElection(code, meta, start, end, allowChange)`.
@@ -146,7 +146,7 @@ set VOTER_SECRET=dni|fecha|secreto
 # bash/zsh
 # export VOTER_SECRET="dni|fecha|secreto"
 
-npm run enroll --network localhost
+npm run enroll
 ```
 
 Esto invoca `Voting.enroll(code, voterHash)`.
@@ -160,7 +160,7 @@ Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`, `VOTE_TEXT` (p.ej. `"PSOE"`
 ```bash
 # CMD
 set VOTE_TEXT=PSOE
-npm run vote:text --network localhost
+npm run vote:text
 ```
 
 El contrato calcula `keccak256(bytes(voteText))` y actualiza el recuento por **hash**. Si la elección permite cambio (`allowChange=true`), el **último voto** sustituye al anterior.
@@ -174,7 +174,7 @@ Variables: `CONTRACT`, `CODE_HUMAN`, `OPTION_TEXT`.
 ```bash
 # CMD
 set OPTION_TEXT=PSOE
-npm run tally:hash --network localhost
+npm run tally:hash
 ```
 
 El script hashea `OPTION_TEXT` con la misma normalización (minúsculas + trim) y consulta `Voting.tallyByHash(code, voteHash)`.
@@ -186,7 +186,7 @@ El script hashea `OPTION_TEXT` con la misma normalización (minúsculas + trim) 
 Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`.
 
 ```bash
-npm run myvote --network localhost
+npm run myvote
 ```
 
 Devuelve tu **hash de voto** almacenado (`Voting.myVoteHash(code, voterHash)`).
