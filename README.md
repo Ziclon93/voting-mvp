@@ -170,17 +170,6 @@ Devuelve tu `myVoteHash` almacenado on-chain.
 
 ## Verificar tu voto (texto ↔ hash) ✅
 
-> **Nuevo**: `scripts/verify.myvote.ts`  
-> Asegúrate de añadir el script en `package.json`:
->
-> ```json
-> {
->   "scripts": {
->     "verify:myvote": "hardhat run scripts/verify.myvote.ts"
->   }
-> }
-> ```
-
 Variables: `CONTRACT`, `CODE_HUMAN`, `VOTER_SECRET`, `VOTE_TEXT`.
 
 ```bat
